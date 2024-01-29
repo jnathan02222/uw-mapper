@@ -22,7 +22,7 @@ function Menu(props){
             <button className={menuStyles.button} onClick={toggleTracking}>{isTracking ? "Stop Tracking" : "Start Tracking"}</button>
             <button className={menuStyles.button} onClick={props.eventHandlers["addMarkerHandler"]}>📌</button>
             <button className={menuStyles.button} onClick={props.eventHandlers["clearNodesHandler"]}>🗑️</button>
-            <div className={menuStyles.button} onClick={props.eventHandlers["handleUpload"]}>Upload</div> 
+            <button className={menuStyles.button} onClick={props.eventHandlers["handleUpload"]}>Upload</button> 
             <button className={menuStyles.button} onClick={props.eventHandlers["handleDownload"]}>Download</button>
         </div>
     );

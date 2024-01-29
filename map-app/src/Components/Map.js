@@ -9,6 +9,7 @@ function Canvas(props){
     //Display images as well
     //Change floor being viewed
     //Select, delete and label nodes
+    //Add nodes
 
     return (
         <div>

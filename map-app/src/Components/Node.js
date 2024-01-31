@@ -4,7 +4,7 @@ class Node {
         this.longitude = longitude;
         this.altitude = altitude;
         this.name = name;
-        this.neighbours = [];
+        this.neighbours = [ ];
     }
 }
 

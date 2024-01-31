@@ -12,3 +12,19 @@
     flex-direction: column;
 }
 
+.titleBox {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1em;
+
+    background-color: white;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin: 0.1em;
+    border-style: solid;
+    border-color: black;
+    border-width: 2px;
+
+    line-height: 1rem;
+
+    
+}

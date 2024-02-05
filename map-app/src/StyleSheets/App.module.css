@@ -4,27 +4,62 @@
 .app {
     font-family: 'Nunito', sans-serif;
 
+
+    width: 100vw;
+    font-size: 0.9em;
+    
     display: flex;
     justify-content: center;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    width: 100vw;
+
     height: 100vh;
     flex-direction: column;
+    width: 360px;
+
 }
 
 .titleBox {
     font-family: 'Nunito', sans-serif;
+    font-size: 1.2em;
+
+    background-color: white;
+    margin: 0.1em;
+    
+    margin-top: 3em;
+
+    line-height: 1em;
+    border-style: none;
+    
+
+}
+.titleBox:focus {
+    outline: none;
+}
+
+.search {
+    font-family: 'Nunito', sans-serif;
     font-size: 1em;
 
     background-color: white;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
+    padding: 0.5em;
+    border-radius: 0.5em;
     margin: 0.1em;
     border-style: solid;
     border-color: black;
     border-width: 2px;
 
-    line-height: 1rem;
+    line-height: 1em;
+}
 
-    
+
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
 }

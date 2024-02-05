@@ -10,9 +10,17 @@ import Node from "./Node.js"
 function App() {
   const trackingFunction = useRef(null);
   const [nodes, setNodes] = useState([]);
-  const nodeId = useRef(0);
   const form = useRef();
+  const app = useRef();
+  const nodeMap = useRef(new Map());
 
+
+  function updateCanvas(){
+    const appWidth = parseInt(( window.getComputedStyle(app.current).getPropertyValue("width") ).replace("px", ""));
+    const appHeight = parseInt(( window.getComputedStyle(app.current).getPropertyValue("height") ).replace("px", ""));
+
+    return { width: appWidth, height: appHeight}; 
+  }
 
   useEffect(
     () => {
@@ -20,14 +28,23 @@ function App() {
     }
   , []);
 
+  
+
   function startTracking(){
     function successHandler(position){
-      let newNode = new Node(position.coords.latitude, position.coords.longitude, position.coords.altitude, nodeId.current);
-      nodeId.current += 1;
+      let name = generateBase64();
+      while(nodeMap.current.has(name)){
+        name = generateBase64();
+      }
+      let newNode = new Node(position.coords.latitude, position.coords.longitude, position.coords.altitude, name);
       setNodes(prev => [...prev, newNode]);
+      nodeMap.current.set(name, newNode);
+      
     }
     trackingFunction.current = setInterval(()=>{getLocation(successHandler)}, 1000);
   }
+
+  
 
   function stopTracking(){
     clearInterval(trackingFunction.current);
@@ -47,13 +64,22 @@ function App() {
   }
 
   function addMarker(){
-    const name = prompt("Name this node:");
+    let name = prompt("Name this node:");
+    
+    while(true){
+      if(name == null || !nodeMap.current.has(name)){ //Break if cancel or name is unique
+        break;
+      }
+      name = prompt("That name has been taken, try again.");
+    }
     if(name == null){
       return;
     }
+
     function successHandler(position){
       let newNode = new Node(position.coords.latitude, position.coords.longitude, position.coords.altitude, name);
       setNodes(prev => [...prev, newNode]);
+      nodeMap.current.set(name, newNode);
     }
     getLocation(successHandler);
 
@@ -67,10 +93,16 @@ function App() {
   function upload(){
     //https://developer.mozilla.org/en-US/docs/Web/API/FileReader
     
-    //To do:
-    //Remove link from DOM
-    //upload function (assigns unique names and updates relations)
-    //built in distance check 
+    
+  }
+
+  function generateBase64(){
+    var string = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    for (var i = 0; i < 64; i++) {
+      string += possible.charAt(Math.floor(Math.random() * 64));
+    }
+    return string;
   }
 
   function download(){
@@ -89,12 +121,15 @@ function App() {
   }
 
   return (
-    <div className={appStyles.app}>
-        <form ref={form}>
-          <input className={appStyles.titleBox} type="text" name="name" placeholder="Untitled Map"></input>
-        </form>
-        <Canvas nodes={nodes}></Canvas>
-        <Menu eventHandlers={{startTrackingHandler: startTracking, stopTrackingHandler: stopTracking, addMarkerHandler: addMarker, clearNodesHandler: clearNodes, uploadHandler: upload, downloadHandler: download}} ></Menu>
+    <div className={appStyles.app} ref={app}>
+        <div className={appStyles.container}>
+          <form className={appStyles.form} ref={form}>
+            <input className={appStyles.titleBox} type="text" name="name" placeholder="Untitled Map"></input>
+            <input className={appStyles.search} type="text" placeholder="Search for a marker..."></input>
+          </form>
+          <Canvas resizeHandler={updateCanvas} nodes={nodes}></Canvas>
+          <Menu eventHandlers={{startTrackingHandler: startTracking, stopTrackingHandler: stopTracking, addMarkerHandler: addMarker, clearNodesHandler: clearNodes, uploadHandler: upload, downloadHandler: download}} ></Menu>
+        </div>
     </div>
   );
 }

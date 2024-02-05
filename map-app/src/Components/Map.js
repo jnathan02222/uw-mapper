@@ -1,5 +1,6 @@
 import { Stage, Layer } from "react-konva" 
 import mapStyles from "../StyleSheets/Map.module.css"
+
 import React, {useEffect, useState} from 'react';
 
 function Canvas(props){
@@ -51,7 +52,7 @@ function Canvas(props){
 
       
     return (
-        <div>
+        <div className={mapStyles.map}>
             <Stage
                 width={appDimensions["width"]}
                 height={appDimensions["height"]}
@@ -61,8 +62,15 @@ function Canvas(props){
 
                 </Layer>
             </Stage>
+            
         </div>
     );
 }
 
+/*
+<div className={mapStyles.zoom}>
+    <button className={mapStyles.button}>➕</button>
+    <button className={mapStyles.button}>➖</button>
+</div>
+*/
 export default Canvas;

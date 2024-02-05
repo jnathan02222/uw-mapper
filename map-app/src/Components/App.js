@@ -125,7 +125,8 @@ function App() {
         <div className={appStyles.container}>
           <form className={appStyles.form} ref={form}>
             <input className={appStyles.titleBox} type="text" name="name" placeholder="Untitled Map"></input>
-            <input className={appStyles.search} type="text" placeholder="Search for a marker..."></input>
+            <input className={appStyles.search} type="text" placeholder="Starting location"></input>
+            <input className={appStyles.search} type="text" placeholder="Destination"></input>
           </form>
           <Canvas resizeHandler={updateCanvas} nodes={nodes}></Canvas>
           <Menu eventHandlers={{startTrackingHandler: startTracking, stopTrackingHandler: stopTracking, addMarkerHandler: addMarker, clearNodesHandler: clearNodes, uploadHandler: upload, downloadHandler: download}} ></Menu>

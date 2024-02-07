@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/uw-mapper/static/css/main.bad14296.css",
-    "main.js": "/uw-mapper/static/js/main.b2511853.js",
+    "main.js": "/uw-mapper/static/js/main.80c832a3.js",
     "static/js/787.2308ae64.chunk.js": "/uw-mapper/static/js/787.2308ae64.chunk.js",
     "index.html": "/uw-mapper/index.html",
     "main.bad14296.css.map": "/uw-mapper/static/css/main.bad14296.css.map",
-    "main.b2511853.js.map": "/uw-mapper/static/js/main.b2511853.js.map",
+    "main.80c832a3.js.map": "/uw-mapper/static/js/main.80c832a3.js.map",
     "787.2308ae64.chunk.js.map": "/uw-mapper/static/js/787.2308ae64.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.bad14296.css",
-    "static/js/main.b2511853.js"
+    "static/js/main.80c832a3.js"
   ]
 }

@@ -73,7 +73,6 @@ function App() {
     <div className={appStyles.app}>
         <Menu eventHandlers={{startTrackingHandler: startTracking, stopTrackingHandler: stopTracking, addMarkerHandler: addMarker, clearNodesHandler: clearNodes, uploadHandler: upload, downloadHandler: download}} ></Menu>
         <Canvas nodes={nodes}></Canvas>
-        
     </div>
   );
 }

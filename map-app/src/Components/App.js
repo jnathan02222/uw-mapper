@@ -2,18 +2,19 @@ import appStyles from "../StyleSheets/App.module.css"
 import Menu from "./Menu.js"
 import Canvas from "./Map.js"
 import React, {useEffect, useRef, useState} from "react";
-import Node from "./Node.js"
+import Point from "./Point.js"
 
-  //Save nodes and image location in cookies?
+  //Save points and image location in cookies?
 
 
 function App() {
   const trackingFunction = useRef(null);
-  const [nodes, setNodes] = useState([]);
+  const [points, setPoints] = useState([]);
+  const [currentCoordinates, setCurrentCoordinates] = useState({latitude: 0, longitude: 0, direction: 0});
+
   const form = useRef();
   const app = useRef();
-  const nodeMap = useRef(new Map());
-
+  const pointMap = useRef(new Map());
 
   function updateCanvas(){
     const appWidth = parseInt(( window.getComputedStyle(app.current).getPropertyValue("width") ).replace("px", ""));
@@ -24,6 +25,10 @@ function App() {
 
   useEffect(
     () => {
+      function successHandler(position){
+        setCurrentCoordinates({latitude: position.coords.latitude, longitude: position.coords.longitude});
+      }
+      getLocation(successHandler);
       return () => {if(trackingFunction.current != null){clearInterval(trackingFunction.current)}};
     }
   , []);
@@ -32,19 +37,24 @@ function App() {
 
   function startTracking(){
     function successHandler(position){
-      let name = generateBase64();
-      while(nodeMap.current.has(name)){
-        name = generateBase64();
+      let name = generateBase64(64);
+      while(pointMap.current.has(name)){
+        name = generateBase64(64);
       }
-      let newNode = new Node(position.coords.latitude, position.coords.longitude, position.coords.altitude, name);
-      setNodes(prev => [...prev, newNode]);
-      nodeMap.current.set(name, newNode);
-      
+      let newPoint = new Point(position.coords.latitude, position.coords.longitude, position.coords.altitude, name);
+      if(!tooClose(newPoint)){
+        setPoints(prev => [...prev, newPoint]);
+        pointMap.current.set(name, newPoint);
+      }
+      setCurrentCoordinates({latitude: position.coords.latitude, longitude: position.coords.longitude});
     }
-    trackingFunction.current = setInterval(()=>{getLocation(successHandler)}, 1000);
+    trackingFunction.current = setInterval(()=>{getLocation(successHandler)}, 100);
+    
   }
 
-  
+  function tooClose(point){
+    return false;
+  }
 
   function stopTracking(){
     clearInterval(trackingFunction.current);
@@ -64,51 +74,112 @@ function App() {
   }
 
   function addMarker(){
-    let name = prompt("Name this node:");
+    let tag = prompt("Name this point:");
     
-    while(true){
-      if(name == null || !nodeMap.current.has(name)){ //Break if cancel or name is unique
-        break;
-      }
-      name = prompt("That name has been taken, try again.");
-    }
-    if(name == null){
+    if(tag == null){
       return;
     }
 
     function successHandler(position){
-      let newNode = new Node(position.coords.latitude, position.coords.longitude, position.coords.altitude, name);
-      setNodes(prev => [...prev, newNode]);
-      nodeMap.current.set(name, newNode);
+      let name = generateBase64(64);
+      while(pointMap.current.has(name)){
+        name = generateBase64(64);
+      }
+      let newPoint = new Point(position.coords.latitude, position.coords.longitude, position.coords.altitude, name);
+      newPoint.addTag(tag);
+      setPoints(prev => [...prev, newPoint]);
+      pointMap.current.set(name, newPoint);
     }
     getLocation(successHandler);
 
   }
-  function clearNodes(){
-    if(window.confirm("Delete nodes? This action is irreversible.")){
-      setNodes([]);
+  function clearPoints(){
+    if(window.confirm("Delete points? This action is irreversible.")){
+      pointMap.current.clear();
+      setPoints([]);
     }
   }
 
-  function upload(){
-    //https://developer.mozilla.org/en-US/docs/Web/API/FileReader
-    
-    
+  
+  function upload(fileInputRef){
+    let file = (fileInputRef["filename"].files)[0];
+    let fileReader = new FileReader();
+
+    function onReaderLoad(){
+      
+      let lines = fileReader.result.split("\n");
+
+      let newPoints = [];
+      let newNameMap = new Map();
+
+      lines.forEach(
+        (line) => {
+          
+            
+          let info = line.split(",");
+          if(!Point.isValid(info)){
+            return;
+          }
+
+          let name = info[0];
+          while(pointMap.current.has(name)){
+            name = generateBase64(64);
+          }
+          if(name !== info[0]){
+            newNameMap.set(info[0], name);
+          }
+          let newPoint = new Point(info[1], info[2], info[3], name);
+      
+          newPoint.setNeighbours(info[4].split[" "]);
+          
+          newPoints.push(newPoint);
+
+          pointMap.current.set(name, newPoint);
+        }
+      );
+      //Perform a second pass to update names
+      //Pretty inefficient, fix later?
+      
+      newPoints.forEach(
+        (point) => {
+          for(let i = 0; i < point.neighbours.length; i++){
+            let name = newNameMap.has(point.neighbours[i]);
+            if(newNameMap.has(name)){
+              point.neighbours[i] = newNameMap.get(name);
+            }
+          }
+        }
+      );
+
+      //Finally, compute new neighbours for combined list
+
+      setPoints(prev => prev.concat(newPoints));
+
+    }
+
+
+    fileReader.onloadend  = onReaderLoad; //When finished reading parse result into points
+    fileReader.readAsText(file); //Read
+
+    //clears file from form
+    fileInputRef.reset();
   }
 
-  function generateBase64(){
+  function generateBase64(length){
     var string = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    for (var i = 0; i < 64; i++) {
+    for (var i = 0; i < length; i++) {
       string += possible.charAt(Math.floor(Math.random() * 64));
     }
     return string;
   }
+  
+
 
   function download(){
     let content = "data:text/csv;charset=utf-8,";
-    for(var i = 0; i < nodes.length; i++){
-      content += nodes[i].toString() + "\n";
+    for(var i = 0; i < points.length; i++){
+      content += points[i].toString() + "\n";
     }
     let encoded = encodeURI(content);
     let link = document.createElement("a");
@@ -121,24 +192,40 @@ function App() {
   }
 
   return (
+    <div>
     <div className={appStyles.app} ref={app}>
         <div className={appStyles.container}>
           <form className={appStyles.form} ref={form}>
             <input className={appStyles.titleBox} type="text" name="name" placeholder="Untitled Map"></input>
-            <input className={appStyles.search} type="text" placeholder="Starting location"></input>
-            <input className={appStyles.search} type="text" placeholder="Destination"></input>
+            <input className={appStyles.search} type="text" placeholder="Search..."></input>
           </form>
-          <Canvas resizeHandler={updateCanvas} nodes={nodes}></Canvas>
-          <Menu eventHandlers={{startTrackingHandler: startTracking, stopTrackingHandler: stopTracking, addMarkerHandler: addMarker, clearNodesHandler: clearNodes, uploadHandler: upload, downloadHandler: download}} ></Menu>
+          <Canvas resizeHandler={updateCanvas} points={points} currentCoordinates={currentCoordinates}></Canvas>
+          <Menu eventHandlers={{startTrackingHandler: startTracking, stopTrackingHandler: stopTracking, addMarkerHandler: addMarker, clearPointsHandler: clearPoints, uploadHandler: upload, downloadHandler: download}} ></Menu>
         </div>
     </div>
+    
+  </div>
   );
 }
 /*
+<div>
+        {
+          points.map(
+            (point) => {
+                return <div>{point.toString()}</div>
+              }
+            )
+        }
+    </div>
+    </div>
+
+<input className={appStyles.search} type="text" placeholder="Starting location"></input>
+<input className={appStyles.search} type="text" placeholder="Destination"></input>
+            
 {
-nodes.map(
-  (node) => {
-      return <div>{node.latitude}</div>
+points.map(
+  (point) => {
+      return <div>{point.latitude}</div>
     }
   )
 }

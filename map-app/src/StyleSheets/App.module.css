@@ -35,7 +35,7 @@
     line-height: 1em;
     border-style: none;
     
-
+    z-index: 1;
 }
 .titleBox:focus {
     outline: none;
@@ -54,6 +54,8 @@
     border-width: 2px;
 
     line-height: 1em;
+    z-index: 1;
+
 }
 
 

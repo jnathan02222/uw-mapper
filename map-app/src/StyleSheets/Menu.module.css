@@ -3,7 +3,7 @@
 .menu {
     display: flex;
     flex-direction: column;
-
+    z-index: 1;
 }
 
 .button {
@@ -44,8 +44,9 @@
     border-width: 2px;
     line-height: 1em;
     cursor: pointer;
+    background-color: white;
 
-}
+}   
 
 .fileLabel:active {
     background-color: #EFEFEF;

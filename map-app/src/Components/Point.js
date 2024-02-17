@@ -35,6 +35,31 @@ class Point {
         return !isNaN(info[1]) && !isNaN(info[2]); //ignore altitude for now !isNaN(info[3])
     }
 }
+// have a hashmap that contains bins
+// have bins go recursively?
+// start with one layer of bins for now
 
+// this will be an integer
+var binSize;
+function binMap(listOfPoints){
+    var maxLat = -1234567890;
+    var minLat = 1234567890;
+    var maxLong = -1234567890;
+    var minLong = 1234567890;
+    for(var i = 0; i < listOfPoints.len(); i++){
+        if(listOfPoints[i].latitude > maxLat){
+            maxLat = listOfPoints[i].latitude
+        }
+        else if(listOfPoints[i].latitude < minLat){
+            minLat = listOfPoints[i].latitude
+        }
+        else if(listOfPoint[i].longitude > maxLong){
+
+        }
+        else if(listOfPoint[i].longitude > maxLong){
+
+        }
+    }
+}
 
 export default Point;

@@ -1,4 +1,4 @@
-import { Stage, Layer, Circle, Line , Group} from "react-konva" 
+import { Stage, Layer, Circle, Line , Rect, Group} from "react-konva" 
 import mapStyles from "../StyleSheets/Map.module.css"
 
 import React, {useEffect, useState, useRef} from 'react';
@@ -10,51 +10,10 @@ function Canvas(props){
     const [mouseData, setMouseData] = useState({xStart: 0, yStart: 0, xEnd: 0, yEnd: 0});
     const [currentCoordinates, setCurrentCoordinates] = useState();
     const stage = useRef();
-    //0.
-    //upload function (assigns unique names and updates relations) --clears file from form + 
-    //Update position constantly, only add Points that aren't too close +
-
-    //1.
-    //Display all points +
-
-    //2.
-    //Zoom in and zoom out button / move camera 
-    //Change elevation 
-
-    //3.
-    //Select, delete and label points
-    //Add points at click location 
-
-    //Extra
-    //Import images, resize, and scale
-    //Display images as well
-    //Remove link from DOM    
-
-    //Albert
-    //Write a function that accepts a Point and places it in a bin
-    //Write a function that takes a Point and checks if it's too close to other points
-    //Write a function that computes neighbours
-    //Pathfinding algorithmn
+    const zoomMultiplier = 10;
+    const keysPressed = useRef([]);
+    const mode = useRef("move");
     
-    //Backend
-    //Remember search history
-    //Request points for certain sections
-    //STORE LOCALLY: schedules
-
-    //App
-    //Camera object
-    //Search bar to look for Points (classify bathrooms, buildings)
-    //Choose location by clicking on it
-    //Add begin journey button
-        //Draw path line
-        //Orient based on direction faced
-        //Instruction bar that updates at checkpoints
-        //Recalculating if off track
-                //Change floor being viewed
-
-
-        //Refactor code
-        //Faster name update algo?
     useEffect(
         
         () => {
@@ -62,11 +21,28 @@ function Canvas(props){
                 setAppDimensions(props.resizeHandler());
             }
             window.addEventListener('resize', handleResize);
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup', handleKeyUp);
+            
+
+
             setCurrentCoordinates(props.currentCoordinates);
+
+
         }
       , [props]);
     
+
+    function selectMode(){
+        if(keysPressed.current.indexOf("Shift") !== -1){
+            mode.current = 'select';
+        }else{
+            mode.current = 'move';
+        }
+    }
     function handleMouseDown(e){
+        selectMode();
+
         mouseDown.current = true;
         const pos = stage.current.getPointerPosition();
         setMouseData({xStart: pos.x, yStart: pos.y, xEnd: pos.x, yEnd: pos.y});
@@ -82,40 +58,79 @@ function Canvas(props){
     function handleMouseUp(e){
         
         mouseDown.current=false;
-        setCurrentCoordinates({latitude: currentCoordinates["latitude"] + (mouseData["xStart"] - mouseData["xEnd"])/scale, longitude: currentCoordinates["longitude"] + (mouseData["yStart"] - mouseData["yEnd"])/scale})
+        if(mode.current === "move"){
+            setCurrentCoordinates({latitude: currentCoordinates["latitude"] + (mouseData["xStart"] - mouseData["xEnd"])/scale, longitude: currentCoordinates["longitude"] + (mouseData["yStart"] - mouseData["yEnd"])/scale})
+        }
         setMouseData({xStart: 0, yStart: 0, xEnd: 0, yEnd: 0});
         
     }
-      
+
+    function zoom(e){
+        console.log(scale);
+        if(e.deltaY > 0){ //Zoom out, reduce scale factor
+            setScale(prev => {return Math.max(1, prev-(e.deltaY*zoomMultiplier))});
+        }else if(e.deltaY < 0){ //Zoom in, increase scale factor
+            setScale(prev => {return Math.min(250000, prev-(e.deltaY*zoomMultiplier))});
+        }
+    }
+
+    function handleKeyDown(e){
+        if(keysPressed.current.indexOf(e.key) === -1){
+            keysPressed.current.push(e.key);
+        }
+    }
+    function handleKeyUp(e){
+        const index = keysPressed.current.indexOf(e.key);
+        if (index !== -1) { 
+            keysPressed.current.splice(index, 1);
+        }
+    }
+    //mode.current==="select" ? ()=>{}: 
     return (
         <div className={mapStyles.map}
+        onWheel={zoom}
+        onMouseOut={handleMouseUp}
+        
+
         >
-            
-            <Stage ref={stage}
+                <Stage ref={stage}
                 width={appDimensions["width"]}
                 height={appDimensions["height"]}
                 className={mapStyles.canvas}
 
-                 onMouseMove={dragScreen} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}  onMouseOut={handleMouseUp}
-        onTouchMove={dragScreen} onTouchStart={handleMouseDown} onTouchEnd={handleMouseUp} 
+                onMouseMove={dragScreen} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}  
+                onTouchMove={dragScreen} onTouchStart={handleMouseDown} onTouchEnd={handleMouseUp} 
                 >
                 <Layer>
-
+                    
                     {props.points.map(
                         (point, i) => {
-                            let cameraX = currentCoordinates["latitude"] + (mouseData["xStart"] - mouseData["xEnd"])/scale;
-                            let cameryY = currentCoordinates["longitude"] + (mouseData["yStart"] - mouseData["yEnd"])/scale;
+                            let cameraX = currentCoordinates["latitude"];
+                            let cameryY = currentCoordinates["longitude"];
+                            if(mode.current === "move"){
+                                cameraX += (mouseData["xStart"] - mouseData["xEnd"])/scale;
+                                cameryY += (mouseData["yStart"] - mouseData["yEnd"])/scale;
+                            }
                             let xPos = appDimensions["width"]/2 + (point.latitude-cameraX)*scale;
                             let yPos = appDimensions["height"]/2 + (point.longitude-cameryY)*scale;
 
                             return (
                             <Group key={i}>
                                 <Circle x={xPos} y={yPos} radius={9} fill="black"></Circle>
-                                <Circle x={xPos} y={yPos} radius={6} fill="white"></Circle>
+                                <Circle x={xPos} y={yPos} radius={6} fill="white" onClick={()=>{console.log("HELLO")}}></Circle>
+                                
                             </Group>
                             );
                         }
                     )}
+                    {mode.current === "select" && <Rect
+                        x={Math.min(mouseData["xStart"], mouseData["xEnd"])}
+                        y={Math.min(mouseData["yStart"], mouseData["yEnd"])}
+                        width={Math.abs(mouseData["xStart"] - mouseData["xEnd"])}
+                        height={Math.abs(mouseData["yStart"] - mouseData["yEnd"])}
+                        fill="blue"
+                        opacity={0.1}
+                    ></Rect>}
                 </Layer>
             </Stage>
             

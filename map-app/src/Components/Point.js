@@ -3,6 +3,15 @@ class Point {
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
+        if(this.altitude === null){
+            this.altitude = 0;
+        }
+        if(this.latitude === null){
+            this.latitude = 0;
+        }
+        if(this.longitude === null){
+            this.longitude = 0;
+        }
         this.name = name;
         this.neighbours = [];
         this.tag = "";

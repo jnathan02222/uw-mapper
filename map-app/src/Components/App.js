@@ -10,7 +10,7 @@ import Point from "./Point.js"
 function App() {
   const trackingFunction = useRef(null);
   const [points, setPoints] = useState([]);
-  const [currentCoordinates, setCurrentCoordinates] = useState({latitude: 0, longitude: 0, direction: 0});
+  const [currentCoordinates, setCurrentCoordinates] = useState({latitude: 0, longitude: 0, altitude: 0, direction: 0});
 
   const form = useRef();
   const app = useRef();
@@ -26,14 +26,18 @@ function App() {
   useEffect(
     () => {
       function successHandler(position){
-        setCurrentCoordinates({latitude: position.coords.latitude, longitude: position.coords.longitude});
+        updatePosition(position);
       }
       getLocation(successHandler);
+      //getCookies();
       return () => {if(trackingFunction.current != null){clearInterval(trackingFunction.current)}};
     }
   , []);
 
   
+
+
+
 
   function startTracking(){
     function successHandler(position){
@@ -46,10 +50,19 @@ function App() {
         setPoints(prev => [...prev, newPoint]);
         pointMap.current.set(name, newPoint);
       }
-      setCurrentCoordinates({latitude: position.coords.latitude, longitude: position.coords.longitude});
+      updatePosition(position);
     }
     trackingFunction.current = setInterval(()=>{getLocation(successHandler)}, 100);
     
+  }
+
+  function updatePosition(position){
+    let altitude = position.coords.altitude;
+    if(altitude === null){
+      altitude = 0;
+    }
+    setCurrentCoordinates({latitude: position.coords.latitude, longitude: position.coords.longitude, altitude: altitude});
+
   }
 
   function tooClose(point){
@@ -100,14 +113,8 @@ function App() {
     }
   }
 
-  
-  function upload(fileInputRef){
-    let file = (fileInputRef["filename"].files)[0];
-    let fileReader = new FileReader();
-
-    function onReaderLoad(){
-      
-      let lines = fileReader.result.split("\n");
+  function loadPoints(text, recomputeNeighbours){
+      let lines = text.split("\n");
 
       let newPoints = [];
       let newNameMap = new Map();
@@ -139,24 +146,55 @@ function App() {
       );
       //Perform a second pass to update names
       //Pretty inefficient, fix later?
-      
-      newPoints.forEach(
-        (point) => {
-          for(let i = 0; i < point.neighbours.length; i++){
-            let name = newNameMap.has(point.neighbours[i]);
-            if(newNameMap.has(name)){
-              point.neighbours[i] = newNameMap.get(name);
+      if(recomputeNeighbours){
+        newPoints.forEach(
+          (point) => {
+            for(let i = 0; i < point.neighbours.length; i++){
+              let name = newNameMap.has(point.neighbours[i]);
+              if(newNameMap.has(name)){
+                point.neighbours[i] = newNameMap.get(name);
+              }
             }
           }
-        }
-      );
-
+        );
+      }
       //Finally, compute new neighbours for combined list
 
       setPoints(prev => prev.concat(newPoints));
+  }
 
+
+  /*
+  useEffect(
+    ()=>{
+      setCookies(pointsToCsv(), 365);
     }
+  ,[points]);
 
+  
+  function getCookies(){
+    let decodedCookie = decodeURIComponent(document.cookie).replace("points=", "").replaceAll("!", ",").replaceAll("@", " ").replaceAll("#", "\n");
+    console.log(document.cookie);
+    loadPoints(decodedCookie, false);
+  }
+  function setCookies(pointsAsCsv, exdays){
+    const d = new Date();
+    d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+    let expires = "expires="+d.toUTCString();
+
+    let points = pointsAsCsv.replaceAll(",", "!").replaceAll(" ", "@").replaceAll("\n", "#");
+    document.cookie = "points=\"" + points + "\";" + expires + ";path=/";
+    console.log(document.cookie);
+  }*/
+
+  
+  function upload(fileInputRef){
+    let file = (fileInputRef["filename"].files)[0];
+    let fileReader = new FileReader();
+
+    function onReaderLoad(){
+      loadPoints(fileReader.result, true);
+    }
 
     fileReader.onloadend  = onReaderLoad; //When finished reading parse result into points
     fileReader.readAsText(file); //Read
@@ -174,13 +212,16 @@ function App() {
     return string;
   }
   
-
+  function pointsToCsv(){
+    let result = "";
+    for(var i = 0; i < points.length; i++){
+      result += points[i].toString() + "\n";
+    }
+    return result;
+  }
 
   function download(){
-    let content = "data:text/csv;charset=utf-8,";
-    for(var i = 0; i < points.length; i++){
-      content += points[i].toString() + "\n";
-    }
+    let content = "data:text/csv;charset=utf-8," + pointsToCsv();
     let encoded = encodeURI(content);
     let link = document.createElement("a");
     link.setAttribute("href", encoded);
@@ -201,6 +242,7 @@ function App() {
             <input className={appStyles.titleBox} type="text" name="name" placeholder="Untitled Map"></input>
             <input className={appStyles.search} type="text" placeholder="Search..."></input>
           </form>
+          <div>{!navigator.geolocation && "Your browser does not support Geolocation."}</div>
           <Canvas resizeHandler={updateCanvas} points={points} currentCoordinates={currentCoordinates}></Canvas>
           <Menu eventHandlers={{startTrackingHandler: startTracking, stopTrackingHandler: stopTracking, addMarkerHandler: addMarker, clearPointsHandler: clearPoints, uploadHandler: upload, downloadHandler: download}} ></Menu>
         </div>

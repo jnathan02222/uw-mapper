@@ -8,13 +8,14 @@
     display: flex;
     justify-content: right;
     align-items: center;
-
+    touch-action: none;
 }
 
 .canvas {
     position: absolute;
     top: 0;
     left: 0;
+    
 }
 
 .zoom {
@@ -49,3 +50,67 @@
     justify-content: center;
     align-items: center;
 }
+
+.editorBar {
+    font-size: 16px;
+
+    z-index: 2;
+    position: fixed;
+    padding: 1em;
+    background-color: #F4F4F4;
+    border-radius: 1em;
+    opacity: 0.70;
+
+}
+
+.button {
+    background-color: white;
+    border-radius: 0.5em;
+    margin-top: 0.2em;
+    flex: 1 1 0px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.button:active {
+    background-color: #EFEFEF;
+    
+}
+
+.tagEditor {
+    display: flex;
+    flex-direction: row;
+    gap: 0.2em;
+    
+}
+
+.changeTags {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+
+    background-color: white;
+    padding: 0.5em;
+    border-radius: 0.5em;
+    margin-top: 0.2em;
+    border-style: solid;
+    border-color: black;
+    border-width: 2px;
+
+    line-height: 16px;
+    z-index: 1;
+
+    width: calc(100% - 4px - 1em);
+}
+
+
+.slider {
+
+    appearance: slider-vertical;
+    z-index: 3;
+    cursor: pointer;
+    
+
+    
+}
+

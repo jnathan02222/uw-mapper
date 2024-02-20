@@ -14,7 +14,7 @@ function Menu(props){
         }else{
             (props.eventHandlers["startTrackingHandler"])();
         }
-        setIsTracking(!isTracking);
+        setIsTracking(prev => !prev);
 
     }
 
@@ -25,15 +25,13 @@ function Menu(props){
                 props.eventHandlers["uploadHandler"](fileUploadRef.current);
             }
             (fileRef).addEventListener('change', onChange);
-
-
             return ()=>{(fileRef).removeEventListener('change', onChange)};
         }
     ,[props.eventHandlers]);
     
     return (
             <div className={menuStyles.container}>
-                <div className={menuStyles.topRow}>
+                <div className={menuStyles.bottomRow}>
                     <label className={menuStyles.button} onClick={toggleTracking}>{isTracking ? "Stop Tracking" : "Start Tracking"}</label>
                     <label className={menuStyles.button} onClick={props.eventHandlers["addMarkerHandler"]}>📌</label>
                     <label className={menuStyles.button} onClick={props.eventHandlers["clearPointsHandler"]}>🗑️</label>

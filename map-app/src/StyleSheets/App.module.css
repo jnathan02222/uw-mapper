@@ -17,7 +17,7 @@
     justify-content: space-between;
     align-items: center;
 
-    height: 100vh;
+    height: 100svh;
     flex-direction: column;
     width: 360px;
 
@@ -43,7 +43,7 @@
 
 .search {
     font-family: 'Nunito', sans-serif;
-    font-size: 1em;
+    font-size: 16px;
 
     background-color: white;
     padding: 0.5em;
@@ -53,7 +53,7 @@
     border-color: black;
     border-width: 2px;
 
-    line-height: 1em;
+    line-height: 16px;
     z-index: 1;
 
 }
@@ -62,6 +62,5 @@
 .form {
     display: flex;
     flex-direction: column;
-    width: 100%;
-
+    width: 100%;    
 }

@@ -42,7 +42,6 @@ class Point {
 
 // this will be an integer
 var binSize = 1; //just a placeholder value. binSize will mean soemthing I haven't decided what yet
-var neighbourDist; // this will be a the min distance for 1 node to be a neighbour of another node
 
 function measure(lat1, lon1, lat2, lon2){  // generally used geo measurement function
     var R = 6378.137; // Radius of earth in KM
@@ -58,10 +57,10 @@ function measure(lat1, lon1, lat2, lon2){  // generally used geo measurement fun
 
 // maps all of the points into a hashmap!
 function binMap(listOfPoints){
-    var maxLat = -1234567890;
-    var minLat = 1234567890;
-    var maxLong = -1234567890;
-    var minLong = 1234567890;
+    var maxLat = -12345678901234567890;
+    var minLat = 12345678901234567890;
+    var maxLong = -12345678901234567890;
+    var minLong = 12345678901234567890;
 // find borders of our points and stuff
     for(var i = 0; i < listOfPoints.len(); i++){
         if(listOfPoints[i].latitude > maxLat){
@@ -113,6 +112,9 @@ function neighbourHood(point, hashMap, radius){
             }
         }
     }
+}
+function aStandsforAlbert(){
+    
 }
 
 export default Point;
